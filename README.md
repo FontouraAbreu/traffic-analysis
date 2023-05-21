@@ -75,3 +75,15 @@ tcpdump -r attack-trace.pcap -nn | head -n 1 | awk '{print $1}' && tcpdump -r at
 Portanto, o ataque levou cerca de 16 segundos.
 
 ***
+
+## 5. Qual sistema operacional foi alvo do ataque? Qual o serviço atacado? Qual a vulnerabilidade explorada? (3pts)
+
+Para descobrir qual sistema operacional foi alvo do ataque, precisamos analisar as assinaturas nos pacotes, vamos analisar o arquivo `.pcap` utilizando o wireshark.
+
+Em um dos pacotes, é possível encontrar o seguinte texto:
+
+`Native LAN Manager: Windows 2000 5.0`
+
+Indicando que o SO alvo do ataque é o Windows 2000 na versão 5.0.
+
+***
