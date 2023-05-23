@@ -36,6 +36,20 @@ tcpdump -r attack-trace.pcap -n | awk '{print $3}' | sort | cut -d. -f1,2,3 | un
 
 ## 2. O que você consegue descobrir sobre a máquina atacante (ex.: onde ela está localizada)? (1pt)
 
+Para descobrir onde a máquina atacante está localizada, podemos utilizar o comando
+
+```bash
+whois 192.150.11.111 | grep -E 'OrgName|City|Country'
+```
+
+ para descobrir a localização da máquina atacante. O resultado desse comando é:
+
+`OrgName:        Adobe Systems Inc.`
+
+`City:           San Jose`
+
+`Country:        US`
+
 ***
 
 ## 3. Quantas *sessões* TCP o arquivo possui? (1pt)
@@ -72,7 +86,7 @@ tcpdump -r attack-trace.pcap -nn | head -n 1 | awk '{print $1}' && tcpdump -r at
 
 `00:28:44.593813`
 
-Portanto, o ataque levou cerca de 16 segundos.
+Portanto, o ataque levou cerca de `16 segundos`.
 
 ***
 
@@ -86,15 +100,19 @@ Em um dos pacotes, é possível encontrar o seguinte texto:
 
 Indicando que o SO alvo do ataque é o Windows 2000 na versão 5.0.
 
-O serviço atacado foi o Active Directory, que é um serviço de diretório da Microsoft, que armazena informações sobre objetos em uma rede e disponibiliza essas informações a usuários e administradores dessa rede.
+O serviço atacado foi o `Active Directory`.
 
-Podemos ver que o serviço atacado é o AD ( Active Directory ) pois, se analisarmos o frame de N° 33, podemos ver um padding de `\x31` que é o número 1 em hexadecimal.
+Podemos ver que o serviço atacado é o AD ( Active Directory ) pois, se analisarmos o frame de N° 33, que contém comandos de setup do AD:
 
-A vulnerabilidade explorada foi um buffer overflow no serviço de AD. Podemos perceber isso pois, se filtrarmos os pacotes por `length` no wireshark e olharmos apenas para o primeiro tcp stream (`tcp.stream eq 1`) veremos que os os maiores pacotes contém diversos `NOPS` e, prováveis, paddings de `\x31`
+`Active Directory Setup, DsRoleUpgradeDownlevelServer`
+
+A vulnerabilidade explorada foi um buffer overflow no serviço de AD. Podemos perceber isso pois, se filtrarmos os pacotes por `length` no wireshark e olharmos apenas para o primeiro tcp stream (`tcp.stream eq 1`) veremos que os os maiores pacotes contém diversos `NOPS` e, prováveis paddings, `\x31`
 
 ***
 
 ## 6. Esboce graficamente uma visão geral das ações realizadas pelo atacante (considere a topologia de rede, os passos do ataque, os resultados). (3pts)
+
+![attack](attack.png)
 
 ***
 
