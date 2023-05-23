@@ -168,7 +168,8 @@ Devido à essa mensagem final `Goodbye happy r00ting` acredito que sim, um honey
 
 ## 10. Houve código malicioso envolvido? Se sim, qual o nome/rótulo do malware? (1pt)
 
-O código malicioso envolvido foi aquele utilizado no Shellcode, um bind shell para executar comandos via `FTP` e fazer o download de um arquivo.
+Sim, o código malicioso envolvido foi aquele utilizado no Shellcode, um bind shell para executar comandos via `FTP` e fazer o download de um arquivo.
+O nome do arquivo é `ssms.exe`. se procurarmos pelr rótulo `DsRoleUpgradeDownlevelServer`, encontrado anteriormente, o rótulo encontrado é: `Win32.Korgo Worm`
 
 ***
 
